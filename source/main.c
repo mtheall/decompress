@@ -20,12 +20,13 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-#define FAIL(routine)       printf("%-8s: failure\n", #routine)
-#define PASS(routine, time) printf("%-8s: %7d\n", #routine, time)
+#define FAIL(routine)       printf("%-10s: failure\n", #routine)
+#define PASS(routine, time) printf("%-10s: %7d\n", #routine, time)
 
 void testLZSS() {
   int timer;
 
+  /* LZSS in C */
   memset(buf, 0, SIZE);
   DC_FlushAll();
   DC_InvalidateAll();
@@ -39,6 +40,7 @@ void testLZSS() {
   else
     PASS(lzss_C, timer);
 
+  /* LZSS in asm */
   memset(buf, 0, SIZE);
   DC_FlushAll();
   DC_InvalidateAll();
@@ -51,5 +53,19 @@ void testLZSS() {
     FAIL(lzss_asm);
   else
     PASS(lzss_asm, timer);
+
+  /* LZSS in asm - fincs version */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  LZ77_Decompress(lzss_img_bin, buf);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, raw_img_bin, SIZE))
+    FAIL(lzss_fincs);
+  else
+    PASS(lzss_fincs, timer);
 }
 
