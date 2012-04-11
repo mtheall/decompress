@@ -3,16 +3,19 @@
 #include "decompress.h"
 #include "raw_img_bin.h"
 #include "lzss_img_bin.h"
+#include "rle_img_bin.h"
 
 #define SIZE 49152
 static u8 buf[SIZE];
 
 void testLZSS();
+void testRLE();
 
 int main(int argc, char *argv[]) {
   consoleDemoInit();
 
   testLZSS();
+  testRLE();
 
   while(1)
     swiWaitForVBlank();
@@ -81,5 +84,37 @@ void testLZSS() {
     FAIL(lzss_swi);
   else
     PASS(lzss_swi, timer);
+}
+
+void testRLE() {
+  int timer;
+
+  /* RLE in C */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  rleDecompress(rle_img_bin+4, buf, SIZE);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, raw_img_bin, SIZE))
+    FAIL(rle_C);
+  else
+    PASS(rle_C, timer);
+
+  /* RLE in BIOS */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  decompress(rle_img_bin, buf, RLE);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, raw_img_bin, SIZE))
+    FAIL(rle_swi);
+  else
+    PASS(rle_swi, timer);
 }
 
