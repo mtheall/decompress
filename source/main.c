@@ -8,12 +8,14 @@
 #include "lzss_rand_bin.h"
 #include "lzss_zero_bin.h"
 #include "rle_img_bin.h"
+#include "huf_img_bin.h"
 
 #define SIZE 49152
 static u8 buf[SIZE];
 
 void testLZSS(const u8 *in, const u8 *out);
 void testRLE(const u8 *in, const u8 *out);
+void testHuff(const u8 *in, const u8 *out);
 
 int main(int argc, char *argv[]) {
   consoleDemoInit();
@@ -29,6 +31,9 @@ int main(int argc, char *argv[]) {
 
   iprintf("rle_img_bin\n");
   testRLE(rle_img_bin, raw_img_bin);
+
+  iprintf("huf_img_bin\n");
+  testHuff(huf_img_bin, raw_img_bin);
 
   while(1)
     swiWaitForVBlank();
@@ -143,5 +148,23 @@ void testRLE(const u8 *in, const u8 *out) {
     FAIL(rle_swi);
   else
     PASS(rle_swi, timer);
+}
+
+void testHuff(const u8 *in, const u8 *out) {
+  int timer;
+
+  /* Huffman in C */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  huffDecompress(in+4, buf, SIZE, 8);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, out, SIZE))
+    FAIL(huff_C);
+  else
+    PASS(huff_C, timer);
 }
 
