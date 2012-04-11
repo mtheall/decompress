@@ -3,8 +3,10 @@
 #include "decompress.h"
 #include "raw_img_bin.h"
 #include "raw_rand_bin.h"
+#include "raw_zero_bin.h"
 #include "lzss_img_bin.h"
 #include "lzss_rand_bin.h"
+#include "lzss_zero_bin.h"
 #include "rle_img_bin.h"
 
 #define SIZE 49152
@@ -18,6 +20,9 @@ int main(int argc, char *argv[]) {
 
   iprintf("lzss_img_bin\n");
   testLZSS(lzss_img_bin, raw_img_bin);
+
+  iprintf("lzss_zero_bin\n");
+  testLZSS(lzss_zero_bin, raw_zero_bin);
 
   iprintf("lzss_rand_bin\n");
   testLZSS(lzss_rand_bin, raw_rand_bin);
