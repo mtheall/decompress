@@ -38,5 +38,18 @@ void testLZSS() {
     FAIL(lzss_C);
   else
     PASS(lzss_C, timer);
+
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  lzssDecompressASM(lzss_img_bin+4, buf, SIZE);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, raw_img_bin, SIZE))
+    FAIL(lzss_asm);
+  else
+    PASS(lzss_asm, timer);
 }
 
