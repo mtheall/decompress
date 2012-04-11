@@ -31,23 +31,23 @@ lzssDecompressASM:
 
 .Lcopy_compressed:
   ldrb   r5, [r1, -r4]       @ r5 = *(out - disp)
+  subs   r6, r6, #1          @ --len
   strb   r5, [r1], #1        @ *out++ = r5
-  subs   r6, r6, #1          @ if(--len == 0)
-  beq    .Lloop              @   goto loop
-  b      .Lcopy_compressed   @ goto copy_compressed
+  bne    .Lcopy_compressed   @ goto copy_compressed
+  b      .Lloop              @ if(len == 0) goto loop
 
 .Lcopy_aligned:
   tst    r1, #0x1            @ if(r1 & 0x1 == 0) // src/dst is aligned
   beq    .Lcopy_hwords       @   goto copy_hwords
   ldrb   r5, [r1, -r4]       @ r5 = *(out - disp) // read a byte to align
-  strb   r5, [r1], #1        @ *out++ = r5
   sub    r6, r6, #1          @ len--
+  strb   r5, [r1], #1        @ *out++ = r5
 .Lcopy_hwords:
   subs   r6, r6, #2          @ len -= 2
   ldrgeh r5, [r1, -r4]       @ if(len >= 0) r5 = *(short*)(out - disp)
   strgeh r5, [r1], #2        @ if(len >= 0) *(short*)out++ = r5
-  beq    .Lloop              @ if(len == 0) goto loop
   bgt    .Lcopy_hwords       @ if(len > 0) goto copy_hwords
+  beq    .Lloop              @ if(len == 0) goto loop
 @ extra byte
   ldrb   r5, [r1, -r4]       @ r5 = *(out - disp)
   strb   r5, [r1], #1        @ *out++ = r5
@@ -55,7 +55,7 @@ lzssDecompressASM:
 
 .Lcopy_uncompressed:
   ldrb   r4, [r0], #1        @ r4 = *in++
-  strb   r4, [r1], #1        @ *out++ = r4
   sub    r2, r2, #1          @ size--
+  strb   r4, [r1], #1        @ *out++ = r4
   b      .Lloop              @ goto loop
 
