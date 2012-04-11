@@ -67,5 +67,19 @@ void testLZSS() {
     FAIL(lzss_fincs);
   else
     PASS(lzss_fincs, timer);
+
+  /* LZSS in BIOS */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  decompress(lzss_img_bin, buf, LZ77);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, raw_img_bin, SIZE))
+    FAIL(lzss_swi);
+  else
+    PASS(lzss_swi, timer);
 }
 
