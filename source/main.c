@@ -2,20 +2,28 @@
 #include <stdio.h>
 #include "decompress.h"
 #include "raw_img_bin.h"
+#include "raw_rand_bin.h"
 #include "lzss_img_bin.h"
+#include "lzss_rand_bin.h"
 #include "rle_img_bin.h"
 
 #define SIZE 49152
 static u8 buf[SIZE];
 
-void testLZSS();
-void testRLE();
+void testLZSS(const u8 *in, const u8 *out);
+void testRLE(const u8 *in, const u8 *out);
 
 int main(int argc, char *argv[]) {
   consoleDemoInit();
 
-  testLZSS();
-  testRLE();
+  iprintf("lzss_img_bin\n");
+  testLZSS(lzss_img_bin, raw_img_bin);
+
+  iprintf("lzss_rand_bin\n");
+  testLZSS(lzss_rand_bin, raw_rand_bin);
+
+  iprintf("rle_img_bin\n");
+  testRLE(rle_img_bin, raw_img_bin);
 
   while(1)
     swiWaitForVBlank();
@@ -23,10 +31,10 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-#define FAIL(routine)       printf("%-10s: failure\n", #routine)
-#define PASS(routine, time) printf("%-10s: %7d\n", #routine, time)
+#define FAIL(routine)       iprintf(" %-10s: failure\n", #routine)
+#define PASS(routine, time) iprintf(" %-10s: %7d\n", #routine, time)
 
-void testLZSS() {
+void testLZSS(const u8 *in, const u8 *out) {
   int timer;
 
   /* LZSS in C */
@@ -35,10 +43,10 @@ void testLZSS() {
   DC_InvalidateAll();
 
   cpuStartTiming(0);
-  lzssDecompress(lzss_img_bin+4, buf, SIZE);
+  lzssDecompress(in+4, buf, SIZE);
   timer = cpuEndTiming();
 
-  if(memcmp(buf, raw_img_bin, SIZE))
+  if(memcmp(buf, out, SIZE))
     FAIL(lzss_C);
   else
     PASS(lzss_C, timer);
@@ -49,10 +57,10 @@ void testLZSS() {
   DC_InvalidateAll();
 
   cpuStartTiming(0);
-  lzssDecompressASM(lzss_img_bin+4, buf, SIZE);
+  lzssDecompressASM(in+4, buf, SIZE);
   timer = cpuEndTiming();
 
-  if(memcmp(buf, raw_img_bin, SIZE))
+  if(memcmp(buf, out, SIZE))
     FAIL(lzss_asm);
   else
     PASS(lzss_asm, timer);
@@ -63,10 +71,10 @@ void testLZSS() {
   DC_InvalidateAll();
 
   cpuStartTiming(0);
-  LZ77_Decompress(lzss_img_bin, buf);
+  LZ77_Decompress(in, buf);
   timer = cpuEndTiming();
 
-  if(memcmp(buf, raw_img_bin, SIZE))
+  if(memcmp(buf, out, SIZE))
     FAIL(lzss_fincs);
   else
     PASS(lzss_fincs, timer);
@@ -77,16 +85,16 @@ void testLZSS() {
   DC_InvalidateAll();
 
   cpuStartTiming(0);
-  decompress(lzss_img_bin, buf, LZ77);
+  decompress(in, buf, LZ77);
   timer = cpuEndTiming();
 
-  if(memcmp(buf, raw_img_bin, SIZE))
+  if(memcmp(buf, out, SIZE))
     FAIL(lzss_swi);
   else
     PASS(lzss_swi, timer);
 }
 
-void testRLE() {
+void testRLE(const u8 *in, const u8 *out) {
   int timer;
 
   /* RLE in C */
@@ -95,10 +103,10 @@ void testRLE() {
   DC_InvalidateAll();
 
   cpuStartTiming(0);
-  rleDecompress(rle_img_bin+4, buf, SIZE);
+  rleDecompress(in+4, buf, SIZE);
   timer = cpuEndTiming();
 
-  if(memcmp(buf, raw_img_bin, SIZE))
+  if(memcmp(buf, out, SIZE))
     FAIL(rle_C);
   else
     PASS(rle_C, timer);
@@ -109,10 +117,10 @@ void testRLE() {
   DC_InvalidateAll();
 
   cpuStartTiming(0);
-  rleDecompressASM(rle_img_bin+4, buf, SIZE);
+  rleDecompressASM(in+4, buf, SIZE);
   timer = cpuEndTiming();
 
-  if(memcmp(buf, raw_img_bin, SIZE))
+  if(memcmp(buf, out, SIZE))
     FAIL(rle_asm);
   else
     PASS(rle_asm, timer);
@@ -123,10 +131,10 @@ void testRLE() {
   DC_InvalidateAll();
 
   cpuStartTiming(0);
-  decompress(rle_img_bin, buf, RLE);
+  decompress(in, buf, RLE);
   timer = cpuEndTiming();
 
-  if(memcmp(buf, raw_img_bin, SIZE))
+  if(memcmp(buf, out, SIZE))
     FAIL(rle_swi);
   else
     PASS(rle_swi, timer);
