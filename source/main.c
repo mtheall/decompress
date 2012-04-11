@@ -103,6 +103,20 @@ void testRLE() {
   else
     PASS(rle_C, timer);
 
+  /* RLE in asm */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  rleDecompressASM(rle_img_bin+4, buf, SIZE);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, raw_img_bin, SIZE))
+    FAIL(rle_asm);
+  else
+    PASS(rle_asm, timer);
+
   /* RLE in BIOS */
   memset(buf, 0, SIZE);
   DC_FlushAll();
