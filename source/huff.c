@@ -36,9 +36,11 @@ void huffDecompress(const u8 *in, u8 *out, int size, int bits) {
     // read the current node's offset value
     offset = (*node)&0x1F;
 
+    child = (u8 *)(((u32)node)&(~1))+offset*2;
+
     if(word & mask) { // we read a 1
       // point to the "right" child
-      child = (u8 *)((((u32)node)&(~1))+offset*2+3);
+      child += 3;
 
       if((*node)&0x40) { // "right" child is a data node
         // copy the child node into the output buffer and apply mask
@@ -54,7 +56,7 @@ void huffDecompress(const u8 *in, u8 *out, int size, int bits) {
 
     else { // we read a 0
       // point to the "left" child
-      child = (u8 *)((((u32)node)&(~1))+offset*2+2);
+      child += 2;
 
       if((*node)&0x80) { // "left" child is a data node
         // copy the child node into the output buffer and apply mask
