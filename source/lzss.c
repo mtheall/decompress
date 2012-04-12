@@ -1,3 +1,4 @@
+#include <string.h>
 #include "decompress.h"
 
 void lzssDecompress(const u8 *src, u8 *dst, int size) {

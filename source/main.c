@@ -1,5 +1,6 @@
 #include <nds.h>
 #include <stdio.h>
+#include <string.h>
 #include "decompress.h"
 #include "raw_img_bin.h"
 #include "raw_rand_bin.h"

@@ -1,3 +1,4 @@
+#include <string.h>
 #include "decompress.h"
 
 void huffDecompress(const u8 *in, u8 *out, int size, int bits) {
