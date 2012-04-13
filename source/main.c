@@ -8,6 +8,7 @@
 #include "lzss_img_bin.h"
 #include "lzss_rand_bin.h"
 #include "lzss_zero_bin.h"
+#include "lz11_img_bin.h"
 #include "rle_img_bin.h"
 #include "huf_img_bin.h"
 
@@ -15,6 +16,7 @@
 static u8 buf[SIZE];
 
 void testLZSS(const u8 *in, const u8 *out);
+void testLZ11(const u8 *in, const u8 *out);
 void testRLE(const u8 *in, const u8 *out);
 void testHuff(const u8 *in, const u8 *out);
 
@@ -43,6 +45,12 @@ Test_t tests[] = {
     .test = testLZSS,
     .in   = lzss_rand_bin,
     .out  = raw_rand_bin,
+  },
+  {
+    .name = "LZ11 - img",
+    .test = testLZ11,
+    .in   = lz11_img_bin,
+    .out  = raw_img_bin,
   },
   {
     .name = "RLE - img",
@@ -158,6 +166,24 @@ void testLZSS(const u8 *in, const u8 *out) {
     FAIL(lzss_swi);
   else
     PASS(lzss_swi, timer);
+}
+
+void testLZ11(const u8 *in, const u8 *out) {
+  int timer;
+
+  /* LZ11 in C */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  lz11Decompress(in+4, buf, SIZE);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, out, SIZE))
+    FAIL(lz11_C);
+  else
+    PASS(lz11_C, timer);
 }
 
 void testRLE(const u8 *in, const u8 *out) {
