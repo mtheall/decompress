@@ -222,5 +222,19 @@ void testHuff(const u8 *in, const u8 *out) {
     FAIL(huff_C);
   else
     PASS(huff_C, timer);
+
+  /* Huffman in asm */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  huffDecompressASM(in+4, buf, SIZE, 8);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, out, SIZE))
+    FAIL(huff_asm);
+  else
+    PASS(huff_asm, timer);
 }
 

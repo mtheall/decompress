@@ -11,6 +11,7 @@ void rleDecompress(const u8 *src, u8 *dst, int size);
 void rleDecompressASM(const u8 *src, u8 *dst, int size);
 
 void huffDecompress(const u8 *src, u8 *dst, int size, int bits);
+void huffDecompressASM(const u8 *src, u8 *dst, int size, int bits);
 
 #endif /* DECOMPRESS_H */
 
