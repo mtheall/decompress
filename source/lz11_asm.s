@@ -63,7 +63,6 @@ lz11DecompressASM:
 .Lcopy_uncompressed:
   ldrb   r4, [r0], #1        @ r4 = *in++
   strb   r4, [r1], #1        @ *out++ = r4
-  add    r3, r3, #1          @ i++
   sub    r2, r2, #1          @ size--
   b      .Lloop              @ goto loop
 
