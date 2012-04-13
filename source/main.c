@@ -184,6 +184,20 @@ void testLZ11(const u8 *in, const u8 *out) {
     FAIL(lz11_C);
   else
     PASS(lz11_C, timer);
+
+  /* LZ11 in asm */
+  memset(buf, 0, SIZE);
+  DC_FlushAll();
+  DC_InvalidateAll();
+
+  cpuStartTiming(0);
+  lz11DecompressASM(in+4, buf, SIZE);
+  timer = cpuEndTiming();
+
+  if(memcmp(buf, out, SIZE))
+    FAIL(lz11_asm);
+  else
+    PASS(lz11_asm, timer);
 }
 
 void testRLE(const u8 *in, const u8 *out) {
