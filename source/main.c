@@ -18,26 +18,81 @@ void testLZSS(const u8 *in, const u8 *out);
 void testRLE(const u8 *in, const u8 *out);
 void testHuff(const u8 *in, const u8 *out);
 
+typedef struct {
+  char *name;
+  void (*test)(const u8 *, const u8 *);
+  const u8 *in;
+  const u8 *out;
+} Test_t;
+
+Test_t tests[] = {
+  {
+    .name = "LZSS - img",
+    .test = testLZSS,
+    .in   = lzss_img_bin,
+    .out  = raw_img_bin,
+  },
+  {
+    .name = "LZSS - zero",
+    .test = testLZSS,
+    .in   = lzss_zero_bin,
+    .out  = raw_zero_bin,
+  },
+  {
+    .name = "LZSS - rand",
+    .test = testLZSS,
+    .in   = lzss_rand_bin,
+    .out  = raw_rand_bin,
+  },
+  {
+    .name = "RLE - img",
+    .test = testRLE,
+    .in   = rle_img_bin,
+    .out  = raw_img_bin,
+  },
+  {
+    .name = "Huff - img",
+    .test = testHuff,
+    .in   = huf_img_bin,
+    .out  = raw_img_bin,
+  },
+};
+#define numTests (sizeof(tests)/sizeof(tests[0]))
+
 int main(int argc, char *argv[]) {
+  int choice = 0;
+  int down   = 0;
+  int i;
+
   consoleDemoInit();
 
-  iprintf("lzss_img_bin\n");
-  testLZSS(lzss_img_bin, raw_img_bin);
+  while(!(down & KEY_B)) {
+    for(i = 0; i < numTests; i++)
+      iprintf("%c%s\n", choice == i ? '*' : ' ', tests[i].name);
 
-  iprintf("lzss_zero_bin\n");
-  testLZSS(lzss_zero_bin, raw_zero_bin);
+    do {
+      swiWaitForVBlank();
+      scanKeys();
+      down = keysDown();
+    } while(!down);
 
-  iprintf("lzss_rand_bin\n");
-  testLZSS(lzss_rand_bin, raw_rand_bin);
+    iprintf("\x1b[2J");
 
-  iprintf("rle_img_bin\n");
-  testRLE(rle_img_bin, raw_img_bin);
-
-  iprintf("huf_img_bin\n");
-  testHuff(huf_img_bin, raw_img_bin);
-
-  while(1)
-    swiWaitForVBlank();
+    if(down & KEY_UP)
+      choice = (choice + (numTests-1)) % numTests;
+    else if(down & KEY_DOWN)
+      choice = (choice + 1) % numTests;
+    else if(down & KEY_A) {
+      iprintf("%s\n", tests[choice].name);
+      tests[choice].test(tests[choice].in, tests[choice].out);
+      do {
+        swiWaitForVBlank();
+        scanKeys();
+        down = keysDown();
+      } while(!(down & KEY_A));
+      iprintf("\x1b[2J");
+    }
+  }
 
   return 0;
 }
